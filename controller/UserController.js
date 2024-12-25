@@ -25,16 +25,16 @@ const findById = async (req, res) => {
         const user = await User.findById(req.params.id);
         res.status(200).json(user);
     }catch(e){
-        res.status(500).body(e);
+        res.status(500).json(e);
     }
 }
 
 const deleteById = async (req, res) => {
     try{
         User.findByIdAndDelete(req.params.id);
-        req.status(200).body("User account deleted successfully");
+        res.status(200).body("User account deleted successfully");
     } catch (e){
-        req.status(500).body(e);
+        res.status(500).json(e);
     }
 }
 
@@ -43,7 +43,7 @@ const update = async (req, res) => {
         User.findByIdAndUpdate(res.params.id, res.body, {new: true});
         res.status(201).body("User data updated successfully");
     }catch (e){
-        res.status(500).body(e);
+        res.status(500).json(e);
     }
 }
 

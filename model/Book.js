@@ -4,7 +4,7 @@ const bookSchema = new mongoose.Schema({
     title: { type: String, required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     isbn: { type: String, unique: true },
-    publicationDate: { type: Date },
+    publicationDate: { type: Date, default: Date.now},
     contentType: { type: String, enum: ['PDF', 'ePub'], required: true },
     contentURL: { type: String, required: true },
     verifiedStatus: { type: Boolean, default: false }
