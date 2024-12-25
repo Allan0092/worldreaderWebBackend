@@ -5,7 +5,7 @@ const bookSchema = joi.object({
     author: joi.string().required(),
     isbn: joi.string().required(),
     contentType: joi.string().required(),
-    file: joi.file().required()
+    file: joi.string().required()
 })
 
 function BookValidation(req, res, next){
