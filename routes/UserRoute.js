@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", authenticateToken, authorizeRole("Admin"), findAll);
 router.post("/", UserValidation,save);
 router.get("/:id", findById);
-router.delete("/:id", deleteById);
+router.delete("/:id", authenticateToken, authorizeRole("Admin"),deleteById);
 router.post("/:id", update);
 
 module.exports=router;
