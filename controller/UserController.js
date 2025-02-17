@@ -50,6 +50,7 @@ const deleteById = async (req, res) => {
 };
 
 const update = async (req, res) => {
+  let id;
   try {
     // let user = await User.findById(req.params.id);
     // if (!user){
@@ -60,10 +61,19 @@ const update = async (req, res) => {
     // }
     if (req.body.password)
       req.body.password = await bcrypt.hash(req.body.password, 10);
+    try {
+      const email = req.body.email;
+      const user = await User.findOne({ email });
+      id = user.id;
+    } catch (e) {
+      console.log(e.toString());
+      return res.status(404).json("User not found");
+    }
 
-    update_user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    update_user = await User.findByIdAndUpdate(id, req.body, {
       new: true,
     });
+
     return res.status(201).json("User data updated successfully");
   } catch (e) {
     return res.status(500).json(e.toString());
@@ -92,14 +102,33 @@ const getUserDetailsbyEmail = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json("User not found");
-    return res
-      .status(200)
-      .json({
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        country: user.country,
-      });
+    return res.status(200).json({
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      country: user.country,
+    });
+  } catch (e) {
+    res.status(500).json(e.toString());
+  }
+};
+
+const imageUpload = async (req, res) => {
+  try {
+    // // check for the file size and send an error message
+    // if (req.file.size > process.env.MAX_FILE_UPLOAD) {
+    //   return res.status(400).send({
+    //     message: `Please upload an image less than ${process.env.MAX_FILE_UPLOAD}`,
+    //   });
+    // }
+
+    if (!req.file) {
+      return res.status(400).send({ message: "Please upload a file" });
+    }
+    res.status(200).json({
+      success: true,
+      data: req.file.filename,
+    });
   } catch (e) {
     res.status(500).json(e.toString());
   }
@@ -113,4 +142,5 @@ module.exports = {
   update,
   login_user,
   getUserDetailsbyEmail,
+  imageUpload,
 };
