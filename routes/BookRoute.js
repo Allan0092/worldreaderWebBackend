@@ -5,6 +5,7 @@ const {
   findById,
   deleteById,
   update,
+  findAllPublic,
 } = require("../controller/BookController");
 const multer = require("multer");
 const BookValidation = require("../validation/BookValidation");
@@ -26,13 +27,14 @@ const upload = multer({
     }
     cb(null, true);
   },
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  limits: { fileSize: 50 * 1024 * 1024 },
 }).single("file");
 
 const router = express.Router();
 
-router.get("/", findAll);
-router.post("/", upload, BookValidation, save); // Reordered: upload first, then validate
+router.get("/", findAll); // Admin API
+router.get("/public", findAllPublic); // Public API
+router.post("/", upload, BookValidation, save);
 router.get("/:id", findById);
 router.delete("/:id", deleteById);
 router.post("/:id", update);
