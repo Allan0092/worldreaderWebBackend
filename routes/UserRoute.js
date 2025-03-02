@@ -8,6 +8,9 @@ const {
   login_user,
   getUserDetailsbyEmail,
   imageUpload,
+  addToLibrary,
+  removeFromLibrary,
+  getLibrary,
 } = require("../controller/UserController");
 const UserValidation = require("../validation/UserValidation");
 const { authenticateToken, authorizeRole } = require("../security/Auth");
@@ -22,5 +25,8 @@ router.get("/:id", findById);
 router.delete("/:id", authenticateToken, authorizeRole("Admin"), deleteById);
 router.post("/update", authenticateToken, update);
 router.post("/imageUpload", upload, imageUpload);
+router.post("/library/add", addToLibrary);
+router.post("/library/remove", removeFromLibrary);
+router.get("/library/:userId", getLibrary);
 
 module.exports = router;
