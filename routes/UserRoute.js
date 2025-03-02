@@ -11,6 +11,7 @@ const {
   addToLibrary,
   removeFromLibrary,
   getLibrary,
+  updateUser,
 } = require("../controller/UserController");
 const UserValidation = require("../validation/UserValidation");
 const { authenticateToken, authorizeRole } = require("../security/Auth");
@@ -28,5 +29,6 @@ router.post("/imageUpload", upload, imageUpload);
 router.post("/library/add", addToLibrary);
 router.post("/library/remove", removeFromLibrary);
 router.get("/library/:userId", getLibrary);
+router.put("/:userId", updateUser);
 
 module.exports = router;

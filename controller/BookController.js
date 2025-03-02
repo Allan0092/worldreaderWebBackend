@@ -79,10 +79,9 @@ const findAll = async (req, res) => {
 const findAllPublic = async (req, res) => {
   try {
     const books = await Book.find()
-      .populate("author", "first_name last_name") // Populate author with first_name and last_name
-      .select("title coverURL author verifiedStatus"); // Select specific fields
+      .populate("author", "first_name last_name verificationStatus") // Include verificationStatus
+      .select("title coverURL author verifiedStatus");
 
-    // Transform data to include full author name
     const booksWithAuthorName = books.map((book) => ({
       _id: book._id,
       title: book.title,
@@ -92,7 +91,7 @@ const findAllPublic = async (req, res) => {
             book.author.last_name || ""
           }`.trim()
         : "Unknown",
-      verifiedStatus: book.verifiedStatus,
+      verifiedStatus: book.author?.verificationStatus || false, // Use author's verificationStatus
     }));
 
     res.status(200).json(booksWithAuthorName);

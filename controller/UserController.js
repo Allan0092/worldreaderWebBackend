@@ -178,6 +178,24 @@ const update = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const updates = req.body;
+
+    const user = await User.findByIdAndUpdate(userId, updates, { new: true });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log("Updated user:", user); // Debug
+    res.status(200).json(user);
+  } catch (e) {
+    console.error("Update user error:", e);
+    res.status(500).json({ error: e.message });
+  }
+};
+
 const login_user = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -245,4 +263,5 @@ module.exports = {
   addToLibrary,
   removeFromLibrary,
   getLibrary,
+  updateUser,
 };
