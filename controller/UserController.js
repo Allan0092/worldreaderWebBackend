@@ -24,11 +24,15 @@ const addToLibrary = async (req, res) => {
       return res.status(404).json({ message: "Book not found" });
     }
 
-    if (!user.library.includes(bookId)) {
-      user.library.push(bookId);
+    const bookExists = user.library.some(
+      (entry) => entry.book.toString() === bookId
+    );
+    if (!bookExists) {
+      user.library.push({ book: bookId, dateAdded: new Date() });
       await user.save();
     }
 
+    console.log("Updated user library:", user.library); // Debug
     res
       .status(200)
       .json({ message: "Book added to library", library: user.library });
@@ -53,9 +57,12 @@ const removeFromLibrary = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    user.library = user.library.filter((id) => id.toString() !== bookId);
+    user.library = user.library.filter(
+      (entry) => entry.book.toString() !== bookId
+    );
     await user.save();
 
+    console.log("Updated user library after removal:", user.library); // Debug
     res
       .status(200)
       .json({ message: "Book removed from library", library: user.library });
@@ -70,14 +77,24 @@ const getLibrary = async (req, res) => {
     const userId = req.params.userId;
 
     const user = await User.findById(userId).populate(
-      "library",
+      "library.book",
       "title coverURL contentURL"
     );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(user.library);
+    // Transform library to include dateAdded with each book
+    const libraryWithDates = user.library.map((entry) => ({
+      _id: entry.book._id,
+      title: entry.book.title,
+      coverURL: entry.book.coverURL,
+      contentURL: entry.book.contentURL,
+      dateAdded: entry.dateAdded,
+    }));
+
+    console.log("Fetched user library with dates:", libraryWithDates); // Debug
+    res.status(200).json(libraryWithDates);
   } catch (e) {
     console.error("Get library error:", e);
     res.status(500).json({ error: e.message });
@@ -184,6 +201,7 @@ const getUserDetailsbyEmail = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json("User not found");
     return res.status(200).json({
+      id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
