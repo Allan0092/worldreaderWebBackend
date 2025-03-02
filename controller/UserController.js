@@ -2,6 +2,87 @@ const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { SECRET_KEY } = require("../security/Auth");
+const Book = require("../model/Book");
+
+const addToLibrary = async (req, res) => {
+  try {
+    const { userId, bookId } = req.body;
+
+    if (!userId || !bookId) {
+      return res
+        .status(400)
+        .json({ message: "User ID and Book ID are required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (!user.library.includes(bookId)) {
+      user.library.push(bookId);
+      await user.save();
+    }
+
+    res
+      .status(200)
+      .json({ message: "Book added to library", library: user.library });
+  } catch (e) {
+    console.error("Add to library error:", e);
+    res.status(500).json({ error: e.message });
+  }
+};
+
+const removeFromLibrary = async (req, res) => {
+  try {
+    const { userId, bookId } = req.body;
+
+    if (!userId || !bookId) {
+      return res
+        .status(400)
+        .json({ message: "User ID and Book ID are required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.library = user.library.filter((id) => id.toString() !== bookId);
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Book removed from library", library: user.library });
+  } catch (e) {
+    console.error("Remove from library error:", e);
+    res.status(500).json({ error: e.message });
+  }
+};
+
+const getLibrary = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId).populate(
+      "library",
+      "title coverURL contentURL"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user.library);
+  } catch (e) {
+    console.error("Get library error:", e);
+    res.status(500).json({ error: e.message });
+  }
+};
 
 const findAll = async (req, res) => {
   try {
@@ -143,4 +224,7 @@ module.exports = {
   login_user,
   getUserDetailsbyEmail,
   imageUpload,
+  addToLibrary,
+  removeFromLibrary,
+  getLibrary,
 };
