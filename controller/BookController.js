@@ -2,7 +2,7 @@ const Book = require("../model/Book");
 const User = require("../model/User");
 const path = require("path");
 const pdfPoppler = require("pdf-poppler");
-const fs = require("fs").promises; // Add fs.promises for file checking
+const fs = require("fs").promises;
 
 const save = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ const save = async (req, res) => {
       const pdfPath = file.path;
       const coverDir = "./file_storage/covers";
       const coverPrefix = path.basename(pdfPath, ".pdf");
-      const expectedCoverFileName = `${coverPrefix}-001.jpg`; // Match pdf-poppler output
+      const expectedCoverFileName = `${coverPrefix}-001.jpg`;
       coverPath = path.join(coverDir, expectedCoverFileName);
 
       console.log("Generating cover at:", coverPath);
@@ -48,12 +48,10 @@ const save = async (req, res) => {
         page: 1,
       });
 
-      // Verify the file exists
       await fs.access(coverPath);
       book.coverURL = coverPath;
     } catch (coverError) {
       console.error("Cover extraction error:", coverError);
-      // Continue saving without cover if extraction fails
     }
 
     console.log("Book to save:", book);
@@ -79,7 +77,7 @@ const findAll = async (req, res) => {
 const findAllPublic = async (req, res) => {
   try {
     const books = await Book.find()
-      .populate("author", "first_name last_name verificationStatus") // Include verificationStatus
+      .populate("author", "first_name last_name verificationStatus")
       .select("title coverURL author verifiedStatus");
 
     const booksWithAuthorName = books.map((book) => ({
@@ -91,7 +89,7 @@ const findAllPublic = async (req, res) => {
             book.author.last_name || ""
           }`.trim()
         : "Unknown",
-      verifiedStatus: book.author?.verificationStatus || false, // Use author's verificationStatus
+      verifiedStatus: book.author?.verificationStatus || false,
     }));
 
     res.status(200).json(booksWithAuthorName);
@@ -133,4 +131,31 @@ const update = async (req, res) => {
   }
 };
 
-module.exports = { findAll, save, findById, deleteById, update, findAllPublic };
+const findBooksWithCountries = async (req, res) => {
+  try {
+    const books = await Book.find()
+      .populate("author", "Country") // Fetch author's Country field
+      .select("title author");
+
+    const booksWithCountries = books.map((book) => ({
+      _id: book._id,
+      title: book.title,
+      country: book.author?.Country || "Unknown",
+    }));
+
+    res.status(200).json(booksWithCountries);
+  } catch (e) {
+    console.error("Find books with countries error:", e);
+    res.status(500).json({ error: e.message });
+  }
+};
+
+module.exports = {
+  findAll,
+  save,
+  findById,
+  deleteById,
+  update,
+  findAllPublic,
+  findBooksWithCountries, // Export new function
+};

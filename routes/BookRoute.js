@@ -6,6 +6,7 @@ const {
   deleteById,
   update,
   findAllPublic,
+  findBooksWithCountries,
 } = require("../controller/BookController");
 const multer = require("multer");
 const BookValidation = require("../validation/BookValidation");
@@ -32,8 +33,9 @@ const upload = multer({
 
 const router = express.Router();
 
-router.get("/", findAll); // Admin API
-router.get("/public", findAllPublic); // Public API
+router.get("/", findAll);
+router.get("/public", findAllPublic);
+router.get("/map", findBooksWithCountries);
 router.post("/", upload, BookValidation, save);
 router.get("/:id", findById);
 router.delete("/:id", deleteById);
